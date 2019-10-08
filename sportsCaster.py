@@ -1,4 +1,4 @@
-import urllib.request, json, datetime, argparse
+import urllib.request, json, datetime
 from twilio.rest import Client
 from bs4 import BeautifulSoup
 from dateutil import tz
@@ -22,12 +22,6 @@ ESPN_PAGE     = 'https://www.espn.com/soccer/scoreboard'
 
 LEAGUES_CLUBS = {# league slug name           # team short display name
                  'english-premier-league'   : ['Arsenal'],
-                 'major-league-soccer'      : [],
-                 'italian-serie-a'          : [],
-                 'spanish-primera-division' : ['Barcelona'],
-                 'mexican-ascenso-mx'       : [],
-                 'dutch-eredivisie'         : [],
-                 'international-friendly'   : []
                 }
 
 # ESPN ScoreBoard 
@@ -67,7 +61,10 @@ def getLeagues(allLeagues):
 
 def getMessageHeader():
     retStr  = '\n==========================\n'
-    retStr += '   FIXTURES FOR %s\n' % (datetime.datetime.now().date())
+    if isPastNoon():
+        retStr += '     RESULTS FOR %s\n' % (datetime.datetime.now().date())
+    else:
+        retStr += '    FIXTURES FOR %s\n' % (datetime.datetime.now().date())
     retStr += '==========================\n\n'
     return retStr
 
@@ -102,12 +99,23 @@ def getTime(game):
     utcTime = game['competitions'][0]['date'][-6:].rstrip('Z')
     myTime = utcToMyTime(utcTime)
     return myTime 
-    
+
+def isPastNoon():
+    return int(datetime.datetime.now().strftime("%H")) > 12    
+
+def getScores(game):
+    scores = []
+    for team in game['competitions'][0]['competitors']: 
+        scores.append(team['score'])
+    return "%s-%s" % (scores[0],scores[1])
 
 def gameToString(game):
     teams = getTeamsInGame(game) # both teams competing 
-    timeStr = getTime(game) # time of game
-    return "%s VS %s (%s)\n" % (teams[0],teams[1],timeStr)
+    if isPastNoon():
+        gameData = getScores(game)
+    else:
+        gameData = getTime(game) # time of game
+    return "%s VS %s (%s)\n" % (teams[0],teams[1],gameData)
 
 def leagueToString(league):
     desiredGames = 0 
@@ -145,8 +153,8 @@ def scanEspn():
     for league in myLeagues: # put all my leagues into str
         message += leagueToString(league)
         
-    if message == '': # no games were appended to the message
-        message = 'NO GAMES TODAY :('
+    if message == '':
+        message = '\nNo games today :('
     
     return header + message
 
@@ -160,15 +168,9 @@ def sendMessage(client,msg):
         client.messages.create(body=msg,from_=TWILIO_PHONE,to=phones)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-a',action='store_true',help='Enable afternoon mode')
-    args = parser.parse_args()
     
     try:
-        if args.a:
-            message = 'FEATURE NOT YET IMPLENTED'
-        else:
-            message = scanEspn()
+        message = scanEspn()
     except:
         message = 'ERROR: ESPN ScoreBoard could not be parsed'
         
