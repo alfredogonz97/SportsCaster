@@ -8,19 +8,19 @@ from dateutil import tz
 
 
 # TWILIO ACCOUNT INFO - free sms gateway
-TWILIO_PHONE =
-ACCOUNT_SID  = 
-AUTH_TOKEN   = 
+TWILIO_PHONE = # Your twilio phone
+ACCOUNT_SID  = # Your twilio account sid
+AUTH_TOKEN   = # Your twilio auth token
 
 # Target Phone Numbers
 TARGET_PHONE = [
-                # YOUR PHONE NUMBER HERE
+                # YOUR PHONE NUMBER HERE (i.e. '+12345678')
                ]
 
 # Club / Team / League Lists
 ESPN_PAGE     = 'https://www.espn.com/soccer/scoreboard'
 
-LEAGUES_CLUBS = {
+LEAGUES_CLUBS = {# league slug name           # team short display name
                  'english-premier-league'   : ['Arsenal'],
                  'major-league-soccer'      : [],
                  'italian-serie-a'          : [],
@@ -141,14 +141,14 @@ def scanEspn():
     
     # Build sms message
     message = ''
-    message += getMessageHeader()
+    header  = getMessageHeader()
     for league in myLeagues: # put all my leagues into str
         message += leagueToString(league)
-		
-    if message == '': 
-	    message = 'NO GAMES TODAY :('
         
-    return message
+    if message == '': # no games were appended to the message
+        message = 'NO GAMES TODAY :('
+    
+    return header + message
 
 def buildMessage(message):
     twilioCli = Client(ACCOUNT_SID,AUTH_TOKEN)
@@ -160,16 +160,17 @@ def sendMessage(client,msg):
         client.messages.create(body=msg,from_=TWILIO_PHONE,to=phones)
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser()
-	parser.add_argument('-a',action='store_true',help='Enable afternoon mode')
-	args = parser.parse_args()
-	try:
-		if args.a:
-			message = 'FEATURE NOT YET IMPLENTED'
-		else:
-			message = scanEspn()
-	except:
-		message = 'ERROR: ESPN ScoreBoard could not be parsed'
-		
-	buildMessage(message)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-a',action='store_true',help='Enable afternoon mode')
+    args = parser.parse_args()
+    
+    try:
+        if args.a:
+            message = 'FEATURE NOT YET IMPLENTED'
+        else:
+            message = scanEspn()
+    except:
+        message = 'ERROR: ESPN ScoreBoard could not be parsed'
+        
+    buildMessage(message)
     
