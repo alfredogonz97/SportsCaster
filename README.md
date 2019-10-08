@@ -19,7 +19,13 @@ Add all phone numbers that you wish to receive footy notifications to the TARGET
   7. Add club's shortDisplayName value to their appropriate leagues list
   
 ### 4. (OPTIONAL) FOR PI USERS
-Automate notifications by using crontab -e 
+Automate notifications by using crontab. On the pi cmd window enter 'crontab -e' and at the bottom of the list that appears enter the time and date to execute a command. The format for adding items is as follows:
+    
+    min hour day month day-of-the-week command
+    
+For example:
+
+    0 9 * * * sudo python3 sportsCaster.py      # notifies you every day at 9:00 am
 
 ---
 ## MESSAGES
