@@ -1,7 +1,7 @@
-# SportsCaster
-Get footy notifications about your favorite teams (via sms message)
+# **SportsCaster**
+**Get footy notifications about your favorite teams (via sms message)**
 
-
+---
 ## STEPS
 ### 1. TWILIO
 This script uses TWILIO, a free sms-messaging gateway. Visit twilio.com, create an account, and get a twilio phone number! Once this is done, copy the twilio phone number, ACCOUNT SID, and AUTH TOKEN into the sportsCaster.py script.
@@ -20,7 +20,8 @@ Add all phone numbers that you wish to receive footy notifications to the TARGET
   
 ### 4. (OPTIONAL) FOR PI USERS
 Automate notifications by using crontab -e 
-  
+
+---
 ## MESSAGES
 ### MORNING
 In the morning the scripts sends the fixtures for the day and the time the games occur.
